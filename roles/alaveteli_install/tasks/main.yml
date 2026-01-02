@@ -1,0 +1,32 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for alaveteli_install
+
+- name: Download Alaveteli install script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/mysociety/commonlib/master/bin/install-site.sh"
+    dest: "/tmp/alaveteli-install.sh"
+    mode: '0755'
+  become: true
+
+- name: Run Alaveteli install script
+  ansible.builtin.command: >
+    /tmp/alaveteli-install.sh alaveteli {{ alaveteli_user }} {{ alaveteli_host }}
+  args:
+    creates: /var/www/{{ alaveteli_host }}/alaveteli
+  become: true
+
+- name: Remove Alaveteli install script
+  ansible.builtin.file:
+    path: "/tmp/alaveteli-install.sh"
+    state: absent
+  become: true
+
+- name: Restart the Server
+  ansible.builtin.reboot:
+    msg: "Reboot initiated by Ansible"
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: uptime
+  become: true

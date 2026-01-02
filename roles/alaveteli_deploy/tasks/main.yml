@@ -1,0 +1,120 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for alaveteli_deploy
+
+- name: Clone/update git repository to cached copy
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "/var/www/{{ alaveteli_host }}/alaveteli/shared/cached-copy"
+    version: "{{ branch }}"
+    update: yes
+    recursive: yes
+    force: yes
+  become_user: "{{ alaveteli_user }}"
+
+- name: Generate release timestamp
+  ansible.builtin.set_fact:
+    timestamp: "{{ lookup('pipe', 'date -u +%Y%m%d%H%M%S') }}"
+  run_once: true
+
+- name: Create new release directory
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+
+- name: Copy cached copy to new release
+  ansible.builtin.copy:
+    src: "/var/www/{{ alaveteli_host }}/alaveteli/shared/cached-copy/"
+    dest: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/"
+    remote_src: yes
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+  become_user: "{{ alaveteli_user }}"
+
+- name: Set group write permissions on release
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}"
+    mode: g+w
+    recurse: yes
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+
+- name: Create standard Rails directories
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/{{ item }}"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+  loop:
+    - tmp
+    - public
+    - public/system
+    - public/assets
+
+- name: Get current git revision
+  ansible.builtin.command: git rev-parse HEAD
+  args:
+    chdir: "/var/www/{{ alaveteli_host }}/alaveteli/shared/cached-copy"
+  register: git_revision
+  changed_when: false
+  become_user: "{{ alaveteli_user }}"
+
+- name: Write REVISION file
+  ansible.builtin.copy:
+    content: "{{ git_revision.stdout }}"
+    dest: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/REVISION"
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+
+- name: Link files in the shared directory to the new release
+  ansible.builtin.file:
+    src: "/var/www/{{ alaveteli_host }}/alaveteli/shared/{{ item.src }}"
+    dest: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/{{ item.dest }}"
+    state: link
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+  loop:
+    - { src: "general.yml", dest: "config/general.yml" }
+    - { src: "database.yml", dest: "config/database.yml" }
+    - { src: "rails_env.rb", dest: "config/initializers/rails_env.rb" }
+    - { src: "storage.yml", dest: "config/storage.yml" }
+    - { src: "sidekiq.yml", dest: "config/sidekiq.yml" }
+    - { src: "xapiandbs", dest: "lib/acts_as_xapian/xapiandbs" }
+    - { src: "log", dest: "log" }
+    - { src: "tmp/pids", dest: "tmp/pids" }
+    - { src: "themes", dest: "themes" }
+
+- name: Run the post deploy script
+  ansible.builtin.shell: |
+    source ~/.bashrc
+    /var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/script/rails-post-deploy
+  args:
+    chdir: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}"
+    executable: /bin/bash
+  become_user: "{{ alaveteli_user }}"
+  changed_when: true
+
+- name: Remove .git directory from release
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}/.git"
+    state: absent
+
+- name: Update current symlink to new release
+  ansible.builtin.file:
+    src: "/var/www/{{ alaveteli_host }}/alaveteli/releases/{{ timestamp }}"
+    dest: "/var/www/{{ alaveteli_host }}/alaveteli/current"
+    state: link
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+  notify: Restart Alaveteli Services
+
+- name: Clean up old releases (keep last 5)
+  ansible.builtin.shell: |
+    cd /var/www/{{ alaveteli_host }}/alaveteli/releases
+    ls -1t | tail -n +6 | xargs -r rm -rf
+  args:
+    executable: /bin/bash
+  become: true
+  changed_when: false

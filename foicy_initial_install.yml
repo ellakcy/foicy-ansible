@@ -1,0 +1,8 @@
+- name: Alavateli initial install for foi.com.cy
+  hosts: foi.com.cy
+  become: yes
+  roles:
+    - role: ubuntu_update
+    - role: alaveteli_install
+    - role: alaveteli_deploy_setup
+    - role: alaveteli_deploy

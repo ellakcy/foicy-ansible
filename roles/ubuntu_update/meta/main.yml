@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: greg
+  description: Updates and upgrades Ubuntu packages and reboots if required
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+
+  galaxy_tags:
+    - ubuntu
+    - update
+    - upgrade
+    - system
+    - maintenance
+
+dependencies: []

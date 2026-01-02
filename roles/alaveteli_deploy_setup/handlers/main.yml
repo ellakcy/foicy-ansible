@@ -1,0 +1,20 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for alaveteli_deploy_setup
+- name: Reload Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+  become: true
+
+- name: Reload Postfix
+  ansible.builtin.service:
+    name: postfix
+    state: reloaded
+  become: true
+
+# handlers/main.yml
+- name: Reload Systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: true

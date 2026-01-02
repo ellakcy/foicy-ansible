@@ -1,0 +1,8 @@
+all:
+  hosts:
+    foi.com.cy:
+        ansible_host: 116.203.48.195
+        ansible_python_interpreter: /usr/bin/python3
+        alaveteli_host: foi.com.cy
+        alaveteli_user: greg
+        alaveteli_group: greg

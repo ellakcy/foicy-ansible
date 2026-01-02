@@ -1,0 +1,14 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for alaveteli_deploy
+
+- name: Restart Alaveteli Services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - alaveteli.puma.service
+    - alaveteli.sidekiq.service
+    - alaveteli.alert-tracks.service
+    - alaveteli.send-notifications.service
+  become: true

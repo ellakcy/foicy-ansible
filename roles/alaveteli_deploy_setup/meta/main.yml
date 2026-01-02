@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: greg
+  description: Converts Alaveteli installation to Capistrano-style deployment structure with releases and shared directories
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+
+  galaxy_tags:
+    - alaveteli
+    - deployment
+    - capistrano
+    - rails
+    - mysociety
+
+dependencies:
+  - role: alaveteli_install

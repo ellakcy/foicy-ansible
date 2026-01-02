@@ -1,0 +1,6 @@
+---
+- name: Deploy Alaveteli
+  hosts: foi.com.cy
+  become: yes
+  roles:
+    - role: alaveteli_deploy

@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: greg
+  description: Deploys new releases of Alaveteli using Capistrano-style deployment with zero-downtime
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+
+  galaxy_tags:
+    - alaveteli
+    - deployment
+    - rails
+    - capistrano
+    - release
+
+dependencies:
+  - role: alaveteli_deploy_setup

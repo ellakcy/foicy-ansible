@@ -1,0 +1,114 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for alaveteli_deploy_setup
+- name: Install acl so ansible can set ACLs
+  ansible.builtin.apt:
+    name: acl
+    state: present
+    update_cache: yes
+
+- name: Move Alaveteli install directory to backup location
+  ansible.builtin.command: mv /var/www/{{ alaveteli_host }}/alaveteli /var/www/{{ alaveteli_host }}/alaveteli.bak
+  args:
+    removes: "/var/www/{{ alaveteli_host }}/alaveteli"
+    creates: "/var/www/{{ alaveteli_host }}/alaveteli.bak"
+  become: true
+
+- name: Create new Alaveteli shared folder
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+    mode: '0755'
+    recurse: yes
+  become: true
+
+- name: Create new Alaveteli releases folder
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/releases"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+    mode: '0755'
+    recurse: yes
+  become: true
+
+- name: Create new structure under Alaveteli shared folder
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/{{ item }}"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+    mode: '0755'
+    recurse: yes
+  loop:
+    - "tmp/pids"
+    - "themes"
+  become: true
+
+- name: Move files to the shared directory
+  ansible.builtin.command: mv /var/www/{{ alaveteli_host }}/alaveteli.bak/{{ item.src }} /var/www/{{ alaveteli_host }}/alaveteli/shared/{{ item.dest }}
+  args:
+    removes: "/var/www/{{ alaveteli_host }}/alaveteli.bak/{{ item.src }}"
+    creates: "/var/www/{{ alaveteli_host }}/alaveteli/shared/{{ item.dest }}"
+  loop:
+    - { src: "config/general.yml", dest: "general.yml" }
+    - { src: "config/database.yml", dest: "database.yml" }
+    - { src: "config/rails_env.rb", dest: "rails_env.rb" }
+    - { src: "config/storage.yml", dest: "storage.yml" }
+    - { src: "config/sidekiq.yml", dest: "sidekiq.yml" }
+    - { src: "cache/", dest: "cache/" }
+    - { src: "files/", dest: "files/" }
+    - { src: "lib/acts_as_xapian/xapiandbs/", dest: "xapiandbs/" }
+    - { src: "log/", dest: "log/"}
+  become: true
+
+- name: Create cached copy directory if needed
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/cached-copy"
+    state: directory
+    owner: "{{ alaveteli_user }}"
+    group: "{{ alaveteli_group }}"
+
+- name: Remove backup directory after migration
+  ansible.builtin.file:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli.bak"
+    state: absent
+  become: true
+
+- name: Update nginx configuration to point to new Alaveteli path
+  ansible.builtin.replace:
+    path: "/etc/nginx/sites-available/{{ alaveteli_host }}"
+    regexp: '/var/www/{{ alaveteli_host }}/alaveteli/'
+    replace: '/var/www/{{ alaveteli_host }}/alaveteli/current/'
+  notify: Reload Nginx
+  become: true
+
+- name: Update cron configuration to point to new Alaveteli path
+  ansible.builtin.replace:
+    path: "/etc/cron.d/alaveteli"
+    regexp: '/var/www/{{ alaveteli_host }}/alaveteli/'
+    replace: '/var/www/{{ alaveteli_host }}/alaveteli/current/'
+  become: true
+
+- name: Update postfix configuration to point to new Alaveteli path
+  ansible.builtin.replace:
+    path: "/etc/postfix/master.cf"
+    regexp: '/var/www/{{ alaveteli_host }}/alaveteli/'
+    replace: '/var/www/{{ alaveteli_host }}/alaveteli/current/'
+  notify: Reload Postfix
+  become: true
+
+- name: Update Alaveteli systemd service files to point to new path
+  ansible.builtin.replace:
+    path: "/etc/systemd/system/{{ item }}"
+    regexp: '/var/www/{{ alaveteli_host }}/alaveteli'
+    replace: '/var/www/{{ alaveteli_host }}/alaveteli/current'
+  loop:
+    - "alaveteli.alert-tracks.service"
+    - "alaveteli.puma.service"
+    - "alaveteli.send-notifications.service"
+    - "alaveteli.sidekiq.service"
+  notify: Reload Systemd
+  become: true

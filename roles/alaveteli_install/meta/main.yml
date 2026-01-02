@@ -1,0 +1,23 @@
+#SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: greg
+  description: Installs Alaveteli Freedom of Information request platform using mySociety install script
+
+  license: MIT
+
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+
+  galaxy_tags:
+    - alaveteli
+    - foi
+    - freedom
+    - information
+    - mysociety
+
+dependencies: []
