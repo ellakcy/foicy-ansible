@@ -81,7 +81,7 @@
   ansible.builtin.lineinfile:
     path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
     regexp: "^AVAILABLE_LOCALES:"
-    line: "AVAILABLE_LOCALES: 'el en tr'"
+    line: "AVAILABLE_LOCALES: 'en el tr'"
     backup: yes
   when: general_yml_stat.stat.exists
   become: true
