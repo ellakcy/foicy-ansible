@@ -17,6 +17,19 @@
   become: true
   notify: Restart Alaveteli Services
 
+- name: Update THEME_URLS in general.yml
+  ansible.builtin.blockinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    marker: "# {mark} ANSIBLE MANAGED THEME_URLS"
+    regexp: "^THEME_URLS:"
+    block: |
+      THEME_URLS:
+        - 'https://github.com/ellakcy/foicy-theme.git'
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
 - name: Display warning if general.yml does not exist
   ansible.builtin.debug:
     msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
