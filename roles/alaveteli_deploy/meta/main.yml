@@ -20,5 +20,4 @@ galaxy_info:
     - capistrano
     - release
 
-dependencies:
-  - role: alaveteli_deploy_setup
+dependencies: []

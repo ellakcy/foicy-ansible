@@ -20,5 +20,4 @@ galaxy_info:
     - rails
     - mysociety
 
-dependencies:
-  - role: alaveteli_install
+dependencies: []
