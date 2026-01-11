@@ -47,6 +47,36 @@
   become: true
   notify: Restart Alaveteli Services
 
+- name: Update ISO_COUNTRY_CODE in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^ISO_COUNTRY_CODE:"
+    line: "ISO_COUNTRY_CODE: CY"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Update ISO_CURRENCY_CODE in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^ISO_CURRENCY_CODE:"
+    line: "ISO_CURRENCY_CODE: EUR"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Update TIME_ZONE in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^TIME_ZONE:"
+    line: "TIME_ZONE: 'Asia/Nicosia'"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
 - name: Display warning if general.yml does not exist
   ansible.builtin.debug:
     msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
