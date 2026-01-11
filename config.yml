@@ -1,7 +1,6 @@
 ---
-- name: Deploy Alaveteli
+- name: Update Alaveteli Configuration
   hosts: foi.com.cy
   become: yes
   roles:
-    - role: alaveteli_deploy
     - role: alaveteli_config

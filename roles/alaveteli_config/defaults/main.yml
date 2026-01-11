@@ -1,0 +1,12 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for alaveteli_config
+
+# Site identity
+alaveteli_site_name: "FOI Cyprus"
+
+# Domain configuration
+# alaveteli_domain: "foi.com.cy"
+
+# Additional configuration options can be added here as needed
+# Uncomment and set values as required for your deployment

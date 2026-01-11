@@ -1,0 +1,23 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for alaveteli_config
+
+- name: Check if general.yml exists
+  ansible.builtin.stat:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+  register: general_yml_stat
+
+- name: Update SITE_NAME in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^SITE_NAME:"
+    line: "SITE_NAME: '{{ alaveteli_site_name }}'"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Display warning if general.yml does not exist
+  ansible.builtin.debug:
+    msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
+  when: not general_yml_stat.stat.exists

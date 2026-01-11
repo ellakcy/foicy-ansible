@@ -5,4 +5,5 @@
     - role: ubuntu_update
     - role: alaveteli_install
     - role: alaveteli_deploy_setup
+    - role: alaveteli_config
     - role: alaveteli_deploy
