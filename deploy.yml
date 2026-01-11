@@ -3,5 +3,5 @@
   hosts: foi.com.cy
   become: yes
   roles:
-    - role: alaveteli_deploy
     - role: alaveteli_config
+    - role: alaveteli_deploy

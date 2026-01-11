@@ -37,6 +37,16 @@
   become: true
   notify: Restart Alaveteli Services
 
+- name: Update DONATION_URL in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^DONATION_URL:"
+    line: "DONATION_URL: http://www.mysociety.org/donate"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
 - name: Display warning if general.yml does not exist
   ansible.builtin.debug:
     msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
