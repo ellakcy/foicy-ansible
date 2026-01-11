@@ -77,6 +77,26 @@
   become: true
   notify: Restart Alaveteli Services
 
+- name: Update AVAILABLE_LOCALES in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^AVAILABLE_LOCALES:"
+    line: "AVAILABLE_LOCALES: 'el en tr'"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Update DEFAULT_LOCALE in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^DEFAULT_LOCALE:"
+    line: "DEFAULT_LOCALE: 'el'"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
 - name: Display warning if general.yml does not exist
   ansible.builtin.debug:
     msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
