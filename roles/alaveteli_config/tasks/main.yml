@@ -18,13 +18,20 @@
   notify: Restart Alaveteli Services
 
 - name: Update THEME_URLS in general.yml
-  ansible.builtin.blockinfile:
+  ansible.builtin.replace:
     path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
-    marker: "# {mark} ANSIBLE MANAGED THEME_URLS"
-    regexp: "^THEME_URLS:"
-    block: |
-      THEME_URLS:
-        - 'https://github.com/ellakcy/foicy-theme.git'
+    regexp: '^(THEME_URLS:)\n(\s+- .+)$'
+    replace: "THEME_URLS:\n  - 'https://github.com/ellakcy/foicy-theme.git'"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Update THEME_BRANCH in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^THEME_BRANCH:"
+    line: "THEME_BRANCH: 'master'"
     backup: yes
   when: general_yml_stat.stat.exists
   become: true
