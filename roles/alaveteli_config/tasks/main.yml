@@ -97,6 +97,36 @@
   become: true
   notify: Restart Alaveteli Services
 
+- name: Disable emergency admin username in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^ADMIN_USERNAME:"
+    line: "ADMIN_USERNAME: nil"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Disable emergency admin password in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^ADMIN_PASSWORD:"
+    line: "ADMIN_PASSWORD: nil"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
+- name: Disable emergency user in general.yml
+  ansible.builtin.lineinfile:
+    path: "/var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml"
+    regexp: "^DISABLE_EMERGENCY_USER:"
+    line: "DISABLE_EMERGENCY_USER: true"
+    backup: yes
+  when: general_yml_stat.stat.exists
+  become: true
+  notify: Restart Alaveteli Services
+
 - name: Display warning if general.yml does not exist
   ansible.builtin.debug:
     msg: "WARNING: general.yml not found at /var/www/{{ alaveteli_host }}/alaveteli/shared/general.yml - skipping configuration update"
